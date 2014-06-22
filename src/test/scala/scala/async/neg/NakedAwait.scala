@@ -24,7 +24,7 @@ class NakedAwait {
       """
         | import _root_.scala.async.internal.AsyncId._
         | def foo(a: Int)(b: => Int) = 0
-        | async { foo(0)(await(0)) }
+        | asyncId { foo(0)(awaitId(0)) }
       """.stripMargin
     }
   }
@@ -34,7 +34,7 @@ class NakedAwait {
     expectError("await must not be used under a by-name argument.") {
       """
         | import _root_.scala.async.internal.AsyncId._
-        | async { true && await(false) }
+        | asyncId { true && awaitId(false) }
       """.stripMargin
     }
   }
@@ -44,7 +44,7 @@ class NakedAwait {
     expectError("await must not be used under a by-name argument.") {
       """
         | import _root_.scala.async.internal.AsyncId._
-        | async { true || await(false) }
+        | asyncId { true || awaitId(false) }
       """.stripMargin
     }
   }
@@ -54,7 +54,7 @@ class NakedAwait {
     expectError("await must not be used under a nested object.") {
       """
         | import _root_.scala.async.internal.AsyncId._
-        | async { object Nested { await(false) } }
+        | asyncId { object Nested { awaitId(false) } }
       """.stripMargin
     }
   }
@@ -64,7 +64,7 @@ class NakedAwait {
     expectError("await must not be used under a nested trait.") {
       """
         | import _root_.scala.async.internal.AsyncId._
-        | async { trait Nested { await(false) } }
+        | asyncId { trait Nested { awaitId(false) } }
       """.stripMargin
     }
   }
@@ -74,7 +74,7 @@ class NakedAwait {
     expectError("await must not be used under a nested class.") {
       """
         | import _root_.scala.async.internal.AsyncId._
-        | async { class Nested { await(false) } }
+        | asyncId { class Nested { awaitId(false) } }
       """.stripMargin
     }
   }
@@ -84,7 +84,7 @@ class NakedAwait {
     expectError("await must not be used under a nested function.") {
       """
         | import _root_.scala.async.internal.AsyncId._
-        | async { () => { await(false) } }
+        | asyncId { () => { awaitId(false) } }
       """.stripMargin
     }
   }
@@ -94,7 +94,7 @@ class NakedAwait {
     expectError("await must not be used under a nested class.") { // TODO more specific error message
       """
         | import _root_.scala.async.internal.AsyncId._
-        | async { { case x => { await(false) } } : PartialFunction[Any, Any] }
+        | asyncId { { case x => { awaitId(false) } } : PartialFunction[Any, Any] }
       """.stripMargin
     }
   }
@@ -104,7 +104,7 @@ class NakedAwait {
     expectError("await must not be used under a try/catch.") {
       """
         | import _root_.scala.async.internal.AsyncId._
-        | async { try { await(false) } catch { case _ => } }
+        | asyncId { try { awaitId(false) } catch { case _ => } }
       """.stripMargin
     }
   }
@@ -114,7 +114,7 @@ class NakedAwait {
     expectError("await must not be used under a try/catch.") {
       """
         | import _root_.scala.async.internal.AsyncId._
-        | async { try { () } catch { case _ => await(false) } }
+        | asyncId { try { () } catch { case _ => awaitId(false) } }
       """.stripMargin
     }
   }
@@ -124,7 +124,7 @@ class NakedAwait {
     expectError("await must not be used under a try/catch.") {
       """
         | import _root_.scala.async.internal.AsyncId._
-        | async { try { () } finally { await(false) } }
+        | asyncId { try { () } finally { awaitId(false) } }
       """.stripMargin
     }
   }
@@ -134,7 +134,7 @@ class NakedAwait {
     expectError("await must not be used under a pattern guard.") {
       """
         | import _root_.scala.async.internal.AsyncId._
-        | async { 1 match { case _ if await(true) => } }
+        | asyncId { 1 match { case _ if awaitId(true) => } }
       """.stripMargin
     }
   }
@@ -144,7 +144,7 @@ class NakedAwait {
     expectError("await must not be used under a nested method.") {
       """
         | import _root_.scala.async.internal.AsyncId._
-        | async { def foo = await(false) }
+        | asyncId { def foo = awaitId(false) }
       """.stripMargin
     }
   }
@@ -154,7 +154,7 @@ class NakedAwait {
     expectError("return is illegal") {
       """
         | import _root_.scala.async.internal.AsyncId._
-        | def foo(): Any = async { return false }
+        | def foo(): Any = asyncId { return false }
         | ()
         |
         |""".stripMargin
@@ -166,7 +166,7 @@ class NakedAwait {
     expectError("await must not be used under a lazy val initializer") {
       """
         | import _root_.scala.async.internal.AsyncId._
-        | def foo(): Any = async { val x = { lazy val y = await(0); y } }
+        | def foo(): Any = asyncId { val x = { lazy val y = awaitId(0); y } }
         | ()
         |
         |""".stripMargin

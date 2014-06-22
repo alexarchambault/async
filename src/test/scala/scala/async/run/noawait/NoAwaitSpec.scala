@@ -14,7 +14,7 @@ class NoAwaitSpec {
   @Test
   def `async block without await`() {
     def foo = 1
-    async {
+    asyncId {
       foo
       foo
     } mustBe (foo)
@@ -22,7 +22,7 @@ class NoAwaitSpec {
 
   @Test
   def `async block without await 2`() {
-    async {
+    asyncId {
       def x = 0
       if (x > 0) 0 else 1
     } mustBe (1)
@@ -31,6 +31,6 @@ class NoAwaitSpec {
   @Test
   def `async expr without await`() {
     def foo = 1
-    async(foo) mustBe (foo)
+    asyncId(foo) mustBe (foo)
   }
 }

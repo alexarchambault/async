@@ -12,11 +12,11 @@ import scala.async.internal.AsyncId._
 class LazyValSpec {
   @Test
   def lazyValAllowed() {
-    val result = async {
+    val result = asyncId {
       var x = 0
       lazy val y = { x += 1; 42 }
       assert(x == 0, x)
-      val z = await(1)
+      val z = awaitId(1)
       val result = y + x
       assert(x == 1, x)
       identity(y)

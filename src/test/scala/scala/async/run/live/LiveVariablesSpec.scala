@@ -23,21 +23,21 @@ class LiveVariablesSpec {
 
   @Test
   def `zero out fields of reference type`() {
-    val f = async { Cell(1) }
+    val f = asyncIdLV { Cell(1) }
 
     def m1(x: Cell[Int]): Cell[Int] =
-      async { Cell(x.v + 1) }
+      asyncIdLV { Cell(x.v + 1) }
 
     def m2(x: Cell[Int]): String =
-      async { x.v.toString }
+      asyncIdLV { x.v.toString }
 
-    def m3() = async {
-      val a: Cell[Int] = await(f)      // await$1$1
+    def m3() = asyncIdLV {
+      val a: Cell[Int] = awaitIdLV(f)      // await$1$1
       // a == Cell(1)
-      val b: Cell[Int] = await(m1(a))  // await$2$1
+      val b: Cell[Int] = awaitIdLV(m1(a))  // await$2$1
       // b == Cell(2)
       assert(AsyncTestLV.log.exists(_._2 == Cell(1)), AsyncTestLV.log)
-      val res = await(m2(b))           // await$3$1
+      val res = awaitIdLV(m2(b))           // await$3$1
       assert(AsyncTestLV.log.exists(_._2 == Cell(2)))
       res
     }
@@ -47,21 +47,21 @@ class LiveVariablesSpec {
 
   @Test
   def `zero out fields of type Any`() {
-    val f = async { Cell(1) }
+    val f = asyncIdLV { Cell(1) }
 
     def m1(x: Cell[Int]): Cell[Int] =
-      async { Cell(x.v + 1) }
+      asyncIdLV { Cell(x.v + 1) }
 
     def m2(x: Any): String =
-      async { x.toString }
+      asyncIdLV { x.toString }
 
-    def m3() = async {
-      val a: Cell[Int] = await(f)      // await$4$1
+    def m3() = asyncIdLV {
+      val a: Cell[Int] = awaitIdLV(f)      // await$4$1
       // a == Cell(1)
-      val b: Any = await(m1(a))        // await$5$1
+      val b: Any = awaitIdLV(m1(a))        // await$5$1
       // b == Cell(2)
       assert(AsyncTestLV.log.exists(_._2 == Cell(1)))
-      val res = await(m2(b))           // await$6$1
+      val res = awaitIdLV(m2(b))           // await$6$1
       assert(AsyncTestLV.log.exists(_._2 == Cell(2)))
       res
     }
@@ -71,21 +71,21 @@ class LiveVariablesSpec {
 
   @Test
   def `do not zero out fields of primitive type`() {
-    val f = async { 1 }
+    val f = asyncIdLV { 1 }
 
     def m1(x: Int): Cell[Int] =
-      async { Cell(x + 1) }
+      asyncIdLV { Cell(x + 1) }
 
     def m2(x: Any): String =
-      async { x.toString }
+      asyncIdLV { x.toString }
 
-    def m3() = async {
-      val a: Int = await(f)            // await$7$1
+    def m3() = asyncIdLV {
+      val a: Int = awaitIdLV(f)            // await$7$1
       // a == 1
-      val b: Any = await(m1(a))        // await$8$1
+      val b: Any = awaitIdLV(m1(a))        // await$8$1
       // b == Cell(2)
       // assert(!AsyncTestLV.log.exists(p => p._1 == "await$7$1"))
-      val res = await(m2(b))           // await$9$1
+      val res = awaitIdLV(m2(b))           // await$9$1
       assert(AsyncTestLV.log.exists(_._2 == Cell(2)))
       res
     }
@@ -95,21 +95,21 @@ class LiveVariablesSpec {
 
   @Test
   def `zero out fields of value class type`() {
-    val f = async { Cell(1) }
+    val f = asyncIdLV { Cell(1) }
 
     def m1(x: Cell[Int]): Meter =
-      async { new Meter(x.v + 1) }
+      asyncIdLV { new Meter(x.v + 1) }
 
     def m2(x: Any): String =
-      async { x.toString }
+      asyncIdLV { x.toString }
 
-    def m3() = async {
-      val a: Cell[Int] = await(f)      // await$10$1
+    def m3() = asyncIdLV {
+      val a: Cell[Int] = awaitIdLV(f)      // await$10$1
       // a == Cell(1)
-      val b: Meter = await(m1(a))      // await$11$1
+      val b: Meter = awaitIdLV(m1(a))      // await$11$1
       // b == Meter(2)
       assert(AsyncTestLV.log.exists(_._2 == Cell(1)))
-      val res = await(m2(b.len))       // await$12$1
+      val res = awaitIdLV(m2(b.len))       // await$12$1
       assert(AsyncTestLV.log.exists(_._2.asInstanceOf[Meter].len == 2L))
       res
     }
@@ -119,28 +119,28 @@ class LiveVariablesSpec {
 
   @Test
   def `zero out fields after use in loop`() {
-    val f = async { MCell(1) }
+    val f = asyncIdLV { MCell(1) }
 
     def m1(x: MCell[Int], y: Int): Int =
-      async { x.v + y }
+      asyncIdLV { x.v + y }
 
-    def m3() = async {
+    def m3() = asyncIdLV {
       // state #1
-      val a: MCell[Int] = await(f)     // await$13$1
+      val a: MCell[Int] = awaitIdLV(f)     // await$13$1
       // state #2
       var y = MCell(0)
 
       while (a.v < 10) {
         // state #4
         a.v = a.v + 1
-        y = MCell(await(a).v + 1)      // await$14$1
+        y = MCell(awaitIdLV(a).v + 1)      // await$14$1
         // state #7
       }
 
       // state #3
       // assert(AsyncTestLV.log.exists(entry => entry._1 == "await$14$1"))
 
-      val b = await(m1(a, y.v))        // await$15$1
+      val b = awaitIdLV(m1(a, y.v))        // await$15$1
       // state #8
       assert(AsyncTestLV.log.exists(_._2 == MCell(10)), AsyncTestLV.log)
       assert(AsyncTestLV.log.exists(_._2 == MCell(11)))
@@ -152,13 +152,13 @@ class LiveVariablesSpec {
 
   @Test
   def `don't zero captured fields captured lambda`() {
-    val f = async {
+    val f = asyncIdLV {
       val x = "x"
       val y = "y"
-      await(0)
+      awaitIdLV(0)
       y.reverse
       val f = () => assert(x != null)
-      await(0)
+      awaitIdLV(0)
       f
     }
     AsyncTestLV.assertNotNulledOut("x")
@@ -169,13 +169,13 @@ class LiveVariablesSpec {
   @Test
   def `don't zero captured fields captured by-name`() {
     def func0[A](a: => A): () => A =  () => a
-    val f = async {
+    val f = asyncIdLV {
       val x = "x"
       val y = "y"
-      await(0)
+      awaitIdLV(0)
       y.reverse
       val f = func0(assert(x != null))
-      await(0)
+      awaitIdLV(0)
       f
     }
     AsyncTestLV.assertNotNulledOut("x")
@@ -186,15 +186,15 @@ class LiveVariablesSpec {
   @Test
   def `don't zero captured fields nested class`() {
     def func0[A](a: => A): () => A = () => a
-    val f = async {
+    val f = asyncIdLV {
       val x = "x"
       val y = "y"
-      await(0)
+      awaitIdLV(0)
       y.reverse
       val f = new Function0[Unit] {
         def apply = assert(x != null)
       }
-      await(0)
+      awaitIdLV(0)
       f
     }
     AsyncTestLV.assertNotNulledOut("x")
@@ -205,15 +205,15 @@ class LiveVariablesSpec {
   @Test
   def `don't zero captured fields nested object`() {
     def func0[A](a: => A): () => A = () => a
-    val f = async {
+    val f = asyncIdLV {
       val x = "x"
       val y = "y"
-      await(0)
+      awaitIdLV(0)
       y.reverse
       object f extends Function0[Unit] {
         def apply = assert(x != null)
       }
-      await(0)
+      awaitIdLV(0)
       f
     }
     AsyncTestLV.assertNotNulledOut("x")
@@ -223,14 +223,14 @@ class LiveVariablesSpec {
 
   @Test
   def `don't zero captured fields nested def`() {
-    val f = async {
+    val f = asyncIdLV {
       val x = "x"
       val y = "y"
-      await(0)
+      awaitIdLV(0)
       y.reverse
       def xx = x
       val f = xx _
-      await(0)
+      awaitIdLV(0)
       f
     }
     AsyncTestLV.assertNotNulledOut("x")
@@ -247,10 +247,10 @@ class LiveVariablesSpec {
 
     def getMore(b: Base) = 4
 
-    def baz = async {
+    def baz = asyncIdLV {
       outer.head match {
         case (a @ B1(), r) => {
-          val ents = await(getMore(a))
+          val ents = awaitIdLV(getMore(a))
 
           { () =>
             println(a)

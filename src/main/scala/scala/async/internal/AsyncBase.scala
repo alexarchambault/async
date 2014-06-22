@@ -25,20 +25,6 @@ abstract class AsyncBase {
   type FS <: FutureSystem
   val futureSystem: FS
 
-  /**
-   * A call to `await` must be nested in an enclosing `async` block.
-   *
-   * A call to `await` does not block the current thread, rather it is a delimiter
-   * used by the enclosing `async` macro. Code following the `await`
-   * call is executed asynchronously, when the argument of `await` has been completed.
-   *
-   * @param awaitable the future from which a value is awaited.
-   * @tparam T        the type of that value.
-   * @return          the value.
-   */
-  @compileTimeOnly("`await` must be enclosed in an `async` block")
-  def await[T](awaitable: futureSystem.Fut[T]): T = ???
-
   def awaitName: String = "await"
 
   def asyncImpl[T: c.WeakTypeTag](c: Context)

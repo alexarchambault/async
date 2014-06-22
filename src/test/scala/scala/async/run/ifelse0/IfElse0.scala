@@ -47,9 +47,9 @@ class IfElseSpec {
   }
 
   @Test def `await in condition`() {
-    import AsyncId.{async, await}
-    val result = async {
-      if ({await(true); await(true)}) await(1) else ???
+    import AsyncId.{asyncId, awaitId}
+    val result = asyncId {
+      if ({awaitId(true); awaitId(true)}) awaitId(1) else ???
     }
     result mustBe (1)
   }

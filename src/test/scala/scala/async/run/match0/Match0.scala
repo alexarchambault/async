@@ -69,64 +69,64 @@ class MatchSpec {
   }
 
   @Test def `support await in a match expression with binds`() {
-    val result = AsyncId.async {
+    val result = AsyncId.asyncId {
       val x = 1
       Option(x) match {
         case op @ Some(x) =>
           assert(op == Some(1))
-          x + AsyncId.await(x)
-        case None => AsyncId.await(0)
+          x + AsyncId.awaitId(x)
+        case None => AsyncId.awaitId(0)
       }
     }
     result mustBe (2)
   }
 
   @Test def `support await referring to pattern matching vals`() {
-    import AsyncId.{async, await}
-    val result = async {
+    import AsyncId.{asyncId, awaitId}
+    val result = asyncId {
       val x = 1
       val opt = Some("")
-      await(0)
+      awaitId(0)
       val o @ Some(y) = opt
 
       {
         val o @ Some(y) = Some(".")
       }
 
-      await(0)
-      await((o, y.isEmpty))
+      awaitId(0)
+      awaitId((o, y.isEmpty))
     }
     result mustBe ((Some(""), true))
   }
 
   @Test def `await in scrutinee`() {
-    import AsyncId.{async, await}
-    val result = async {
-      await(if ("".isEmpty) await(1) else ???) match {
+    import AsyncId.{asyncId, awaitId}
+    val result = asyncId {
+      awaitId(if ("".isEmpty) awaitId(1) else ???) match {
         case x if x < 0 => ???
-        case y: Int => y * await(3)
+        case y: Int => y * awaitId(3)
       }
     }
     result mustBe (3)
   }
 
   @Test def duplicateBindName() {
-    import AsyncId.{async, await}
-    def m4(m: Any) = async {
+    import AsyncId.{asyncId, awaitId}
+    def m4(m: Any) = asyncId {
       m match {
         case buf: String =>
-          await(0)
+          awaitId(0)
         case buf: Double =>
-          await(2)
+          awaitId(2)
       }
     }
     m4("") mustBe 0
   }
 
   @Test def bugCastBoxedUnitToStringMatch() {
-    import scala.async.internal.AsyncId.{async, await}
-    def foo = async {
-      val p2 = await(5)
+    import scala.async.internal.AsyncId.{asyncId, awaitId}
+    def foo = asyncId {
+      val p2 = awaitId(5)
       "foo" match {
         case p3: String =>
           p2.toString
@@ -136,9 +136,9 @@ class MatchSpec {
   }
 
   @Test def bugCastBoxedUnitToStringIf() {
-    import scala.async.internal.AsyncId.{async, await}
-    def foo = async {
-      val p2 = await(5)
+    import scala.async.internal.AsyncId.{asyncId, awaitId}
+    def foo = asyncId {
+      val p2 = awaitId(5)
       if (true) p2.toString else p2.toString
     }
     foo mustBe "5"

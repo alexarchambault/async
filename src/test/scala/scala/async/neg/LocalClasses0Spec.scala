@@ -11,22 +11,22 @@ import scala.async.internal.AsyncId
 class LocalClasses0Spec {
   @Test
   def localClassCrashIssue16() {
-    import AsyncId.{async, await}
-    async {
+    import AsyncId.{asyncId, awaitId}
+    asyncId {
       class B { def f = 1 }
-      await(new B()).f
+      awaitId(new B()).f
     } mustBe 1
   }
 
   @Test
   def nestedCaseClassAndModuleAllowed() {
-    import AsyncId.{await, async}
-    async {
+    import AsyncId.{awaitId, asyncId}
+    asyncId {
       trait Base { def base = 0}
-      await(0)
+      awaitId(0)
       case class Person(name: String) extends Base
-      val fut = async { "bob" }
-      val x = Person(await(fut))
+      val fut = asyncId { "bob" }
+      val x = Person(awaitId(fut))
       x.base
       x.name
     } mustBe "bob"

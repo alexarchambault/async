@@ -11,18 +11,18 @@ import scala.async.internal.AsyncId
 
 class HygieneSpec {
 
-  import AsyncId.{async, await}
+  import AsyncId.{asyncId, awaitId}
 
   @Test
   def `is hygenic`() {
     val state = 23
     val result: Any = "result"
     def resume(): Any = "resume"
-    val res = async {
+    val res = asyncId {
       val f1 = state + 2
-      val x  = await(f1)
-      val y  = await(result)
-      val z  = await(resume())
+      val x  = awaitId(f1)
+      val y  = awaitId(result)
+      val z  = awaitId(resume())
       (x, y, z)
     }
     res mustBe ((25, "result", "resume"))
@@ -31,8 +31,8 @@ class HygieneSpec {
   @Test
   def `external var as result of await`() {
     var ext = 0
-    async {
-      ext = await(12)
+    asyncId {
+      ext = awaitId(12)
     }
     ext mustBe (12)
   }
@@ -41,11 +41,11 @@ class HygieneSpec {
   def `external var as result of await 2`() {
     var ext = 0
     val inp = 10
-    async {
+    asyncId {
       if (inp > 0)
-        ext = await(12)
+        ext = awaitId(12)
       else
-        ext = await(10)
+        ext = awaitId(10)
     }
     ext mustBe (12)
   }
@@ -54,12 +54,12 @@ class HygieneSpec {
   def `external var as result of await 3`() {
     var ext = 0
     val inp = 10
-    async {
+    asyncId {
       val x = if (inp > 0)
-        await(12)
+        awaitId(12)
       else
-        await(10)
-      ext = x + await(2)
+        awaitId(10)
+      ext = x + awaitId(2)
     }
     ext mustBe (14)
   }
@@ -69,12 +69,12 @@ class HygieneSpec {
     val state = 23
     val result: Any = "result"
     def resume(): Any = "resume"
-    import AsyncId.{await, async}
-    val res = async {
-      val f1 = async { state + 2 }
-      val x  = await(f1)
-      val y  = await(async { result })
-      val z  = await(async(await(async { resume() })))
+    import AsyncId.{awaitId, asyncId}
+    val res = asyncId {
+      val f1 = asyncId { state + 2 }
+      val x  = awaitId(f1)
+      val y  = awaitId(asyncId { result })
+      val z  = awaitId(asyncId(awaitId(asyncId { resume() })))
       (x, y, z)
     }
     res._1 mustBe (25)

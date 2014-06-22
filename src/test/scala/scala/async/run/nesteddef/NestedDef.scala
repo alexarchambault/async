@@ -10,13 +10,13 @@ class NestedDef {
   @Test
   def nestedDef() {
     import AsyncId._
-    val result = async {
+    val result = asyncId {
       val a = 0
-      val x = await(a) - 1
+      val x = awaitId(a) - 1
       val local = 43
       def bar(d: Double) = -d + a + local
       def foo(z: Any) = (a.toDouble, bar(x).toDouble, z)
-      foo(await(2))
+      foo(awaitId(2))
     }
     result mustBe ((0d, 44d, 2))
   }
@@ -25,13 +25,13 @@ class NestedDef {
   @Test
   def nestedFunction() {
     import AsyncId._
-    val result = async {
+    val result = asyncId {
       val a = 0
-      val x = await(a) - 1
+      val x = awaitId(a) - 1
       val local = 43
       val bar = (d: Double) => -d + a + local
       val foo = (z: Any) => (a.toDouble, bar(x).toDouble, z)
-      foo(await(2))
+      foo(awaitId(2))
     }
     result mustBe ((0d, 44d, 2))
   }
@@ -40,9 +40,9 @@ class NestedDef {
   @Test
   def nestedDefTransitive1() {
     import AsyncId._
-    val result = async {
+    val result = asyncId {
       val a = 0
-      val x = await(a) - 1
+      val x = awaitId(a) - 1
       def bar = a
       def foo = bar
       foo
@@ -53,9 +53,9 @@ class NestedDef {
   @Test
   def nestedDefTransitive2() {
     import AsyncId._
-    val result = async {
+    val result = asyncId {
       val a = 0
-      val x = await(a) - 1
+      val x = awaitId(a) - 1
       def bar = a
       def foo = bar
       0
@@ -68,9 +68,9 @@ class NestedDef {
   @Test
   def mutuallyRecursive1() {
     import AsyncId._
-    val result = async {
+    val result = asyncId {
       val a = 0
-      val x = await(a) - 1
+      val x = awaitId(a) - 1
       def foo: Int = if (true) 0 else bar
       def bar: Int = if (true) 0 else foo
       bar
@@ -82,11 +82,11 @@ class NestedDef {
   @Test
   def mutuallyRecursive2() {
     import AsyncId._
-    val result = async {
+    val result = asyncId {
       val a = 0
       def foo: Int = if (true) 0 else bar
       def bar: Int = if (true) 0 else foo
-      val x = await(a) - 1
+      val x = awaitId(a) - 1
       bar
     }
     result mustBe 0

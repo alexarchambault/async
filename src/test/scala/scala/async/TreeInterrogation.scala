@@ -16,11 +16,11 @@ class TreeInterrogation {
     val tb = mkToolbox(s"-cp ${toolboxClasspath}")
     val tree = tb.parse(
       """| import _root_.scala.async.internal.AsyncId._
-        | async {
-        |   val x = await(1)
+        | asyncId {
+        |   val x = awaitId(1)
         |   val y = x * 2
         |   def foo(a: Int) = { def nested = 0; a } // don't lift `nested`.
-        |   val z = await(x * 3)
+        |   val z = awaitId(x * 3)
         |   foo(z)
         |   z
         | }""".stripMargin)
@@ -70,12 +70,12 @@ object TreeInterrogation extends App {
     val tree = tb.parse(
       """
         | import scala.async.internal.AsyncId._
-        | async {
+        | asyncId {
         |   var b = true
-        |   while(await(b)) {
+        |   while(awaitId(b)) {
         |     b = false
         |   }
-        |   await(b)
+        |   awaitId(b)
         | }
         |
         | """.stripMargin)

@@ -11,9 +11,9 @@ class UncheckedBoundsSpec {
       eval( s"""
       object Test {
         import _root_.scala.async.run.toughtype._
-        import _root_.scala.async.internal.AsyncId.{async, await}
-        async {
-          (if (true) await(null: L[A, A]) else await(null: L[B, B]))
+        import _root_.scala.async.internal.AsyncId.{asyncId, awaitId}
+        asyncId {
+          (if (true) awaitId(null: L[A, A]) else awaitId(null: L[B, B]))
         }
     }
     """, compileOptions = s"-cp ${toolboxClasspath} ")

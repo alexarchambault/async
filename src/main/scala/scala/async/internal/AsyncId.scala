@@ -7,23 +7,34 @@ package scala.async.internal
 import language.experimental.macros
 import scala.reflect.macros.Context
 import scala.reflect.api.Universe
+import scala.reflect.internal.annotations.compileTimeOnly
 
 object AsyncId extends AsyncBase {
   lazy val futureSystem = IdentityFutureSystem
   type FS = IdentityFutureSystem.type
 
-  def async[T](body: T) = macro asyncIdImpl[T]
+  def asyncId[T](body: T) = macro asyncIdImpl[T]
 
   def asyncIdImpl[T: c.WeakTypeTag](c: Context)(body: c.Expr[T]): c.Expr[T] = asyncImpl[T](c)(body)(c.literalUnit)
+
+  @compileTimeOnly("`awaitId` must be enclosed in an `asyncId` block")
+  def awaitId[T](awaitable: futureSystem.Fut[T]): T = ???
+
+  override def awaitName = "awaitId"
 }
 
 object AsyncTestLV extends AsyncBase {
   lazy val futureSystem = IdentityFutureSystem
   type FS = IdentityFutureSystem.type
 
-  def async[T](body: T) = macro asyncIdImpl[T]
+  def asyncIdLV[T](body: T) = macro asyncIdLVImpl[T]
 
-  def asyncIdImpl[T: c.WeakTypeTag](c: Context)(body: c.Expr[T]): c.Expr[T] = asyncImpl[T](c)(body)(c.literalUnit)
+  def asyncIdLVImpl[T: c.WeakTypeTag](c: Context)(body: c.Expr[T]): c.Expr[T] = asyncImpl[T](c)(body)(c.literalUnit)
+
+  @compileTimeOnly("`awaitIdLV` must be enclosed in an `asyncIdLV` block")
+  def awaitIdLV[T](awaitable: futureSystem.Fut[T]): T = ???
+  
+  override def awaitName = "awaitIdLV"
 
   var log: List[(String, Any)] = List()
   def assertNulledOut(a: Any): Unit = assert(log.exists(_._2 == a), AsyncTestLV.log)
